@@ -1,0 +1,93 @@
+name: Create Previews
+
+static:
+  youngest_anime_query: select_youngest.sql
+  old_anime_query: select_old_anime.sql
+  ongoing_anime_query: select_ongoing_anime.sql
+  unpopulated_anime_query: select_unpopulated_anime.sql
+  postgres_config: pg.conf
+  pages_requests: requests.json
+
+cubes:
+  get_youngest_anime:
+    label: Young
+    base: sql_get
+    input:
+      query: $S$youngest_anime_query
+      pg_config: $S$postgres_config
+      detuple: true
+      payload: ""
+
+  get_old_anime:
+    label: Old
+    base: sql_get
+    input:
+      query: $S$old_anime_query
+      pg_config: $S$postgres_config
+      detuple: true
+      payload: ""
+
+  get_ongoing_anime:
+    label: Ongoing
+    base: sql_get
+    input:
+      query: $S$ongoing_anime_query
+      pg_config: $S$postgres_config
+      detuple: true
+      payload: ""
+
+  get_unpopulated_anime:
+    label: UnPop
+    base: sql_get
+    input:
+      query: $S$unpopulated_anime_query
+      pg_config: $S$postgres_config
+      detuple: true
+      payload: ""
+
+  unwrap:
+    label: Unwrap
+    base: unwrap
+    input:
+      json: $O$get_youngest_anime
+
+  grab_pages:
+    label: Pages
+    base: http
+    input:
+      requests: $S$pages_requests
+
+  join_arrays:
+    label: Join
+    base: join_arrays
+    input:
+      arrays: $O$grab_pages
+
+  extract_field:
+    label: Extract
+    base: extract_field
+    input:
+      array: $O$join_arrays
+      field: id
+
+  find_smaller:
+    label: Smaller
+    base: find_smaller
+    input:
+      array: $O$extract_field
+      value: $O$unwrap
+
+  join_all_arrays:
+    label: Joins
+    base: join_arrays_files
+    input:
+      youngest: $O$find_smaller
+      old: $O$get_old_anime
+      ongoings: $O$get_ongoing_anime
+      unpopulated: $O$get_unpopulated_anime
+
+  uniq_all_arrays:
+    label: Unique
+    base: uniq_json
+    input:
+      array: $O$join_all_arrays

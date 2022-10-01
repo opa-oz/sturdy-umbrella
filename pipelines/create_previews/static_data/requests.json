@@ -1,0 +1,11 @@
+[
+  {
+    "url": "https://shikimori.one/api/animes?page=1&order=created_at_desc&limit=50"
+  },
+  {
+    "url": "https://shikimori.one/api/animes?page=2&order=created_at_desc&limit=50"
+  },
+  {
+    "url": "https://shikimori.one/api/animes?page=3&order=created_at_desc&limit=50"
+  }
+]
